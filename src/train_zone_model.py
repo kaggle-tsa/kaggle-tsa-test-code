@@ -9,6 +9,11 @@ from keras.layers.normalization import BatchNormalization
 from keras.models import load_model
 from utilities.data_processing_functions import *
 import random
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_curve, auc
+import matplotlib.pyplot as plt
+from sklearn.metrics import precision_recall_fscore_support
+from sklearn.metrics import log_loss
 
 #<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 data_dir = 'C:/Users/john.hife/Documents/workspaces/TSA Kaggle/data/'
@@ -36,6 +41,7 @@ zone_dataset = create_zone_dataset(aps_dir, training_ids['id'], zone_num, zone_a
 zone_dataset = zone_dataset.reshape(zone_dataset.shape[0], zone_dataset.shape[1], zone_dataset.shape[2], 1)
 #plot_image(zone_dataset[0,:,:,:])
 
+#reshape training labels
 training_labels = np.array(training_ids['label'])[0:zone_dataset.shape[0]]
 training_labels = np_utils.to_categorical(training_labels, 2)
 
@@ -86,11 +92,6 @@ zone_predictions = pd.concat([testing_ids.reset_index(drop=True),
 zone_predictions.to_csv('zone_' + str(zone_num) + '_predictions.csv', index=False)
 
 
-#compute model performance on test set
-from sklearn.metrics import roc_auc_score
-from sklearn.metrics import roc_curve, auc
-import matplotlib.pyplot as plt
-from sklearn.metrics import precision_recall_fscore_support
 def plotROC(labels, probs):
     false_positive_rate, true_positive_rate, thresholds = roc_curve(labels, probs)
     roc_auc = auc(false_positive_rate, true_positive_rate)
@@ -104,15 +105,18 @@ def plotROC(labels, probs):
     plt.xlabel('False Positive Rate')
     plt.show()
 
+#compute model performance on test set
 threshold = 0.5
 area_under_roc = roc_auc_score(zone_predictions['label'], zone_predictions['prob'])
 plotROC(zone_predictions['label'], zone_predictions['prob'])
 precision_recall_fscore_support(zone_predictions['label'], np.where(zone_predictions['prob'] > threshold, 1,0))
 precision, recall, fscore, support = precision_recall_fscore_support(zone_predictions['label'], np.where(zone_predictions['prob'] > threshold, 1,0), average='binary')
+logloss = log_loss(zone_predictions['label'], zone_predictions['prob'])
 print('AUC: ' + str(area_under_roc))
 print('Precision: ' + str(precision))
 print('Recall: ' + str(recall))
 print('FScore: ' + str(fscore))
+print('Log Loss: ' + str(logloss))
 
 
 
