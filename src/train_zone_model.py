@@ -85,6 +85,8 @@ zone_predictions = pd.concat([testing_ids.reset_index(drop=True),
                               pd.DataFrame(preds, columns=['prob'])], axis=1)
 zone_predictions.to_csv('zone_' + str(zone_num) + '_predictions.csv', index=False)
 
+
+#compute model performance on test set
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import roc_curve, auc
 import matplotlib.pyplot as plt
@@ -111,6 +113,8 @@ print('AUC: ' + str(area_under_roc))
 print('Precision: ' + str(precision))
 print('Recall: ' + str(recall))
 print('FScore: ' + str(fscore))
+
+
 
 # data = ir.read_data('C:/Users/john.hife/Documents/workspaces/TSA Kaggle/data/stage1_aps/49c3fc4b14948ab097a3462bb825e2f0.aps')
 # data = ir.read_data('C:/Users/john.hife/Documents/workspaces/TSA Kaggle/data/stage1_aps/1cb13f156bd436222447dd658180bd96.aps')
