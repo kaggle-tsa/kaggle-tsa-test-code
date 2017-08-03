@@ -103,11 +103,14 @@ def plotROC(labels, probs):
     plt.show()
 
 threshold = 0.5
-auc = roc_auc_score(zone_predictions['label'], zone_predictions['prob'])
-precision, recall, fscore, support = precision_recall_fscore_support(zone_predictions['label'], np.where(zone_predictions['prob'] > threshold, 1,0), average='binary')
-precision_recall_fscore_support(zone_predictions['label'], np.where(zone_predictions['prob'] > threshold, 1,0))
+area_under_roc = roc_auc_score(zone_predictions['label'], zone_predictions['prob'])
 plotROC(zone_predictions['label'], zone_predictions['prob'])
-
+precision_recall_fscore_support(zone_predictions['label'], np.where(zone_predictions['prob'] > threshold, 1,0))
+precision, recall, fscore, support = precision_recall_fscore_support(zone_predictions['label'], np.where(zone_predictions['prob'] > threshold, 1,0), average='binary')
+print('AUC: ' + str(area_under_roc))
+print('Precision: ' + str(precision))
+print('Recall: ' + str(recall))
+print('FScore: ' + str(fscore))
 
 # data = ir.read_data('C:/Users/john.hife/Documents/workspaces/TSA Kaggle/data/stage1_aps/49c3fc4b14948ab097a3462bb825e2f0.aps')
 # data = ir.read_data('C:/Users/john.hife/Documents/workspaces/TSA Kaggle/data/stage1_aps/1cb13f156bd436222447dd658180bd96.aps')
