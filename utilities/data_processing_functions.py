@@ -118,7 +118,7 @@ def plot_images(data):
     def animate(i):
         im = ax.imshow(np.flipud(data[:,:,i].transpose()), cmap = 'viridis')
         return [im]
-    return matplotlib.animation.FuncAnimation(fig, animate, frames=range(0,data.shape[2]), interval=100, blit=True)
+    return matplotlib.animation.FuncAnimation(fig, animate, frames=range(0,data.shape[2]), interval=200, blit=True)
 
 
 
@@ -157,7 +157,7 @@ def create_zone_dataset(path, ids, zone_num, zone_angles):
     n = len(ids)
     zone_dataset = None
     for i in range(n):
-        id = ids[i]
+        id = ids.iloc[i]
         image_path = path + id + '.aps'
         data = ir.read_data(image_path)
 
@@ -172,3 +172,50 @@ def create_zone_dataset(path, ids, zone_num, zone_angles):
         zone_dataset[i, :, :] = aggregated_image
 
     return zone_dataset
+
+
+def create_zone_dataset_rgb(path, ids, zone_num, zone_angles):
+
+    #n = 10
+    n = len(ids)
+    zone_dataset = None
+    for i in range(n):
+        id = ids[i]
+        image_path = path + id + '.aps'
+        data = ir.read_data(image_path)
+
+        image_list = get_image_list(data, zone_num, zone_angles)
+        max_x_width = get_max_width(image_list, dim=0)
+        max_y_width = get_max_width(image_list, dim=1)
+        aggregated_image = aggregate_zone_images(image_list, max_x_width, max_y_width)
+        aggregated_image = aggregated_image.reshape(aggregated_image.shape[0], aggregated_image.shape[1], 1)
+
+        if zone_dataset is None:
+            zone_dataset = np.empty((n, aggregated_image.shape[0], aggregated_image.shape[1], 3))
+
+        zone_dataset[i, :, :, :0] = aggregated_image
+        zone_dataset[i, :, :, :1] = aggregated_image
+        zone_dataset[i, :, :, :2] = aggregated_image
+
+    return zone_dataset
+
+
+def create_train_test(labels, test_pct):
+    temp = labels[labels['label'] == 0]
+    test_rows = temp.sample(math.floor(temp.shape[0] * test_pct))
+    temp = labels[labels['label'] == 1]
+    test_rows = test_rows.append(temp.sample(math.floor(temp.shape[0] * test_pct)))
+    train_rows = labels.loc[~labels.index.isin(test_rows.index)]
+    # random.seed(12345)
+    # training_ids, testing_ids = create_train_test(zone_labels, test_pct=0.15)
+    # training_ids.shape
+    # sum(training_ids['label'] == 0)
+    # sum(training_ids['label'] == 1)
+    # testing_ids.shape
+    # sum(testing_ids['label'] == 0)
+    # sum(testing_ids['label'] == 1)
+    # training_ids[0:5]
+    # testing_ids[0:5]
+    # set.intersection(set(training_ids['id']), set(testing_ids['id']))
+
+    return train_rows, test_rows
